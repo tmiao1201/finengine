@@ -51,7 +51,7 @@ def build_entities():
             elif e == "CLOUD":
                 rev_maaS = A.CLOUD_TOKENS_B[i] * 36.5 * A.CLOUD_PRICE[i]
                 rev_ext_i = rev_maaS
-                cogs_ext = A.CLOUD_TOKENS_B[i] * 36.5 * A.CLOUD_UCOST[i]
+                cogs_ext = A.CLOUD_TOKENS_B[i] * 36.5 * A.CLOUD_UCOST[i] + A.CLOUD_BW[i]
                 rd = A.CLOUD_HEADCOUNT["rd"][i] * A.CLOUD_SALARY["rd"]
                 sales = A.CLOUD_HEADCOUNT["sales"][i] * A.CLOUD_SALARY["sales"]
                 gna = A.CLOUD_HEADCOUNT["gna"][i] * A.CLOUD_SALARY["gna"]
@@ -172,7 +172,9 @@ def build_entities():
                 IC_AP = toc_t3 * A.IC_DAYS / 365 + t1["TOC"][i] * A.IC_DAYS / 365  # T3+T1，含在途全挂
             cash_cost = IS["cogs"][i] + IS["opex"][i] - (dep["HOLD_TRAIN"][i] if e=="HOLD" else dep["CLOUD_INFER"][i] if e=="CLOUD" else 0.0)
             AP = cash_cost * A.DPO / 365
-            deferred = IS["rev"][i] * A.DEFERRED_RATE.get(e, 0.0)
+            # TOC 递延仅对应订阅预收（广告不产生递延）
+            def_base = (A.TOC_MAU_W[i] * A.TOC_PAYRATE[i] * A.TOC_ARPPU[i] * 12) if e == "TOC" else IS["rev"][i]
+            deferred = def_base * A.DEFERRED_RATE.get(e, 0.0)
             fa = net["HOLD_TRAIN"][i] if e == "HOLD" else (net["CLOUD_INFER"][i] if e == "CLOUD" else 0.0)
             RE = prev["RE"] + IS["ni"][i]
             paid_in = prev["paid_in"] + A.EQUITY_INJECT[e][i]
