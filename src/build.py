@@ -25,9 +25,9 @@ def main(stage="all"):
         from gen_consol import gen as gen_consol
         gen_ic(wb, L, eng); gen_consol(wb, L, eng)
     if stage == "all":
-        for mod, fn in [("gen_analysis", "gen"), ("gen_checks", "gen")]:
+        for mod in ["gen_dashboard", "gen_ue", "gen_projecteval", "gen_checks"]:
             try:
-                m = __import__(mod); getattr(m, fn)(wb, L, eng)
+                m = __import__(mod); m.gen(wb, L, eng)
             except ImportError:
                 print(f"  (skip {mod} — 未实现)")
     wb.save(OUT)
