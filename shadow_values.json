@@ -1,0 +1,79 @@
+{
+ "checks": [
+  [
+   "C1 HOLD BS平衡",
+   "PASS"
+  ],
+  [
+   "C2 HOLD CF=BS现金",
+   "PASS"
+  ],
+  [
+   "C5x HOLD 现金>0",
+   "PASS"
+  ],
+  [
+   "C1 CLOUD BS平衡",
+   "PASS"
+  ],
+  [
+   "C2 CLOUD CF=BS现金",
+   "PASS"
+  ],
+  [
+   "C5x CLOUD 现金>0",
+   "PASS"
+  ],
+  [
+   "C1 IND BS平衡",
+   "PASS"
+  ],
+  [
+   "C2 IND CF=BS现金",
+   "PASS"
+  ],
+  [
+   "C5x IND 现金>0",
+   "PASS"
+  ],
+  [
+   "C1 TOC BS平衡",
+   "PASS"
+  ],
+  [
+   "C2 TOC CF=BS现金",
+   "PASS"
+  ],
+  [
+   "C5x TOC 现金>0",
+   "PASS"
+  ],
+  [
+   "C3 合并BS平衡",
+   "PASS"
+  ],
+  [
+   "C2 合并CF=BS现金",
+   "PASS"
+  ],
+  [
+   "C8 归母+少数=合并NI",
+   "PASS"
+  ],
+  [
+   "形状: 亏损先扩后收",
+   "PASS"
+  ],
+  [
+   "形状: 2026 EBITDA>0",
+   "PASS"
+  ]
+ ],
+ "years": [
+  2023,
+  2024,
+  2025,
+  2026,
+  2027
+ ]
+}
