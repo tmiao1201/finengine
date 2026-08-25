@@ -15,14 +15,17 @@ def main(stage="all"):
     wb = Workbook(); wb.remove(wb.active)
     L = Layout()
     gen_assum(wb, L); gen_capex(wb, L, eng)
-    if stage in ("holdco", "all"):
+    if stage in ("holdco", "consol", "all"):
         from gen_subs import gen as gen_subs
         from gen_holdco import gen as gen_hold
         gen_subs(wb, L, eng)   # 子公司先（HoldCo T1 公式引用其 rev_ext）
         gen_hold(wb, L, eng)
+    if stage in ("consol", "all"):
+        from gen_ic import gen as gen_ic
+        from gen_consol import gen as gen_consol
+        gen_ic(wb, L, eng); gen_consol(wb, L, eng)
     if stage == "all":
-        for mod, fn in [("gen_subs", "gen"), ("gen_ic", "gen"),
-                        ("gen_consol", "gen"), ("gen_analysis", "gen"), ("gen_checks", "gen")]:
+        for mod, fn in [("gen_analysis", "gen"), ("gen_checks", "gen")]:
             try:
                 m = __import__(mod); getattr(m, fn)(wb, L, eng)
             except ImportError:

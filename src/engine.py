@@ -288,6 +288,7 @@ def build_consol(E, t1, t1_hold, t2):
         CF.setdefault("da", []).append(D(da))
         d_ar = BS["AR"][i]-prev["AR"]; d_def = BS["deferred"][i]-prev["deferred"]; d_ap = BS["AP"][i]-prev["AP"]
         d_op = BS["other_payable"][i]-prev["other_pay"]  # 在途挂账为非现金调整
+        CF.setdefault("d_op", []).append(D(d_op))
         cfo = IS["ni"][i] + da - d_ar + d_def + d_ap + d_op
         capex = A.CAPEX["HOLD_TRAIN"][i] + A.CAPEX["CLOUD_INFER"][i]
         # 合并融资 = 研究院自身注资 + 互联战投 20%（给子公司的注资是内部划转，抵消）
