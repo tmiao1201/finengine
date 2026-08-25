@@ -117,9 +117,11 @@ def gen_cover(wb, L, eng):
     c = ws.cell(row=r, column=1, value="导航"); c.font = BOLD
     c2 = ws.cell(row=r, column=2, value="说明"); c2.font = BOLD
     r += 1
+    from openpyxl.worksheet.hyperlink import Hyperlink
     for name, desc in nav:
-        cell = ws.cell(row=r, column=1, value=name.split(" / ")[0])
-        cell.hyperlink = f"#'{name.split(' / ')[0]}'!A1"
+        target = name.split(" / ")[0]
+        cell = ws.cell(row=r, column=1, value=target)
+        cell.hyperlink = Hyperlink(ref=f"A{r}", location=f"'{target}'!A1")
         cell.font = Font(name=FONT, color="0563C1", underline="single")
         ws.cell(row=r, column=2, value=desc).font = BLACK_FORMULA
         r += 1

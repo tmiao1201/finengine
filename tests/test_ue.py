@@ -60,7 +60,8 @@ def main():
         ok = False
         if got is not None and not isinstance(got, str):
             try:
-                ok = abs(float(got) - float(want)) <= max(1e-9, abs(float(want)) * 1e-6)
+                # 相对 1e-6；近零影子值（D() 舍入尘埃）按绝对 1e-6，与 recompute.py 口径一致
+                ok = abs(float(got) - float(want)) <= max(1e-6, abs(float(want)) * 1e-6)
             except (TypeError, ValueError):
                 ok = False
         if not ok:

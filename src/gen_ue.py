@@ -65,9 +65,9 @@ def gen(wb, L, eng):
          U, "自持+外租算力", numFmt='0.00')
     frow("m_gp", "单 token 毛利（元/M tokens）",
          [f"={u('m_price',i)}-{u('m_ucost',i)}" for i in range(5)], m_gp,
-         "=价−成本", bold=True, numFmt='0.00')
+         "价−成本", bold=True, numFmt='0.00')
     frow("m_gm", "单 token 毛利率", [f"={u('m_gp',i)}/{u('m_price',i)}" for i in range(5)],
-         m_gm, "=毛利/单价", numFmt=PCT)
+         m_gm, "毛利/单价", numFmt=PCT)
     sec("── 剪刀差：成本降幅 vs 价格降幅（累计 vs 2023A）──")
     frow("sc_p", "价格累计降幅", [f"=({u('m_price',0)}-{u('m_price',i)})/{u('m_price',0)}"
          for i in range(5)], sc_p, numFmt=PCT)
@@ -83,10 +83,10 @@ def gen(wb, L, eng):
          A.CLOUD_CUSTOMERS, numFmt='#,##0')
     frow("c_arr", "ARR / 客户（万元/家）",
          [f"={L.ref('Cloud_IS','rev_ext',i)}/{ar('CLOUD_CUSTOMERS',i)}" for i in range(5)],
-         arr, "=对外收入÷客户数", numFmt='0.00')
+         arr, "对外收入÷客户数", numFmt='0.00')
     frow("c_gpc", "毛利 / 客户（万元/家）",
          [f"={L.ref('Cloud_IS','gp',i)}/{ar('CLOUD_CUSTOMERS',i)}" for i in range(5)],
-         gpc, "=毛利÷客户数", numFmt='0.00')
+         gpc, "毛利÷客户数", numFmt='0.00')
     frow("c_churn", "月流失率 churn（常量）", [f"={ar('CLOUD_CHURN_M',i)}" for i in range(5)],
          [A.CLOUD_CHURN_M] * 5, "1.2%/月", numFmt=PCT)
     frow("c_life", "平均生命周期（月）= 1/churn", [f"=1/{u('c_churn',i)}" for i in range(5)],
@@ -111,7 +111,7 @@ def gen(wb, L, eng):
          tuc, "含付云 T3", numFmt='0.00')
     frow("t_gpm", "单用户月毛利（元/人/月）",
          [f"={u('t_arpu',i)}-{u('t_ucost',i)}" for i in range(5)], gpm,
-         "=ARPU−单位成本", bold=True, numFmt='0.00')
+         "ARPU−单位成本", bold=True, numFmt='0.00')
     frow("t_cac", "获客 CAC（元/新增用户）", [f"={ar('TOC_CAC',i)}" for i in range(5)],
          A.TOC_CAC, numFmt='0.0')
     frow("t_pb", "回本周期（月）= CAC / 月毛利",

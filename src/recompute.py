@@ -36,6 +36,10 @@ def main(path=None):
         cell = f"{chr(67+i)}{row}"
         got = read(sheet, cell)
         n += 1
+        if isinstance(want, str):
+            if str(got).strip() != want.strip():
+                fails.append((sheet, key, i, want, got))
+            continue
         if got is None or isinstance(got, str):
             fails.append((sheet, key, i, want, got)); continue
         try:
