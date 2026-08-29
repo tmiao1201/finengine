@@ -1,23 +1,76 @@
-"""Assumptions + Capex_Dep 生成器：全部假设落表并注册坐标，附带批次折旧引擎。"""
+"""Assumptions（指标视图层）+ Capex_Dep 生成器。
+数值全部实时取自 Meta 数据表（SUMIFS）——本页只读，改数请改 Meta!G 列。"""
 import assumptions as A
 from style import *
 from layout import Layout
+from gen_meta import meta_sumifs
+
+# 视图层 key → (metric, entity, region)：全部数字的 Meta 溯源
+METRIC_MAP = {
+    "TAX_RATE": ("tax_rate", "GROUP", None), "DSO": ("dso_days", "GROUP", None),
+    "DPO": ("dpo_days", "GROUP", None), "IC_DAYS": ("ic_days", "GROUP", None),
+    "WACC": ("wacc", "GROUP", None),
+    "CLOUD_TOKENS_B": ("token_volume_day", "CLOUD", None),
+    "CLOUD_PRICE": ("api_price", "CLOUD", None),
+    "CLOUD_UCOST": ("inference_ucost", "CLOUD", None),
+    "CLOUD_BW": ("bandwidth_fee", "CLOUD", None),
+    "CLOUD_RD_HC": ("headcount_rd", "CLOUD", None),
+    "CLOUD_SALES_HC": ("headcount_sales", "CLOUD", None),
+    "CLOUD_GNA_HC": ("headcount_gna", "CLOUD", None),
+    "CLOUD_CUSTOMERS": ("customers", "CLOUD", None),
+    "CLOUD_CHURN_M": ("churn_m", "CLOUD", None),
+    "IND_PROJECTS": ("projects_pvt", "IND", None), "IND_CONTRACT": ("avg_contract", "IND", None),
+    "IND_SUBSCRIBERS": ("subscribers_sol", "IND", None), "IND_SUB_FEE": ("sub_fee", "IND", None),
+    "IND_COGS_PVT": ("cogs_rate_pvt", "IND", None), "IND_COGS_SOL": ("cogs_rate_sol", "IND", None),
+    "IND_RD_HC": ("headcount_rd", "IND", None), "IND_SALES_HC": ("headcount_sales", "IND", None),
+    "IND_GNA_HC": ("headcount_gna", "IND", None),
+    "TOC_MAU_W": ("mau_w", "TOC", None), "TOC_PAYRATE": ("pay_rate", "TOC", None),
+    "TOC_ARPPU": ("arppu", "TOC", None), "TOC_ADS": ("ads_rev", "TOC", None),
+    "TOC_UCOST": ("ucost_toc", "TOC", None), "TOC_CAC": ("cac", "TOC", None),
+    "TOC_NEW_U_MULTIPLIER": ("new_user_mult", "TOC", None),
+    "TOC_RD_HC": ("headcount_rd", "TOC", None), "TOC_SALES_HC": ("headcount_sales", "TOC", None),
+    "TOC_GNA_HC": ("headcount_gna", "TOC", None),
+    "HOLD_HC": ("headcount_rd", "HOLD", None), "HOLD_SALARY": ("hold_salary", "HOLD", None),
+    "HOLD_OTHER_RD": ("other_rd", "HOLD", None), "HOLD_GNA_HC": ("headcount_gna", "HOLD", None),
+    "HOLD_GNA_SALARY": ("salary_gna", "HOLD", None),
+    "T1_RATE_CLOUD": ("t1_rate", "CLOUD", None), "T1_RATE_IND": ("t1_rate", "IND", None),
+    "T1_RATE_TOC": ("t1_rate", "TOC", None), "T2_FEE": ("t2_fee", "HOLD", None),
+    "T3_SHARE": ("t3_share", "GROUP", None), "T3_GM": ("t3_gm", "GROUP", None),
+    "CUTOFF_2027": ("cutoff_2027", "GROUP", None),
+    "INJECT_HOLD": ("equity_inject", "HOLD", None), "INJECT_CLOUD": ("equity_inject", "CLOUD", None),
+    "INJECT_IND": ("equity_inject", "IND", None), "INJECT_TOC": ("equity_inject", "TOC", None),
+    "MIX_华东": ("region_mix", "GROUP", "华东"), "MIX_华北": ("region_mix", "GROUP", "华北"),
+    "MIX_华南": ("region_mix", "GROUP", "华南"), "MIX_海外": ("region_mix", "GROUP", "海外"),
+}
+for _e in ["HOLD", "CLOUD", "IND", "TOC"]:
+    METRIC_MAP[f"OPEN_RE_{_e}"] = ("open_re", _e, None)
+    METRIC_MAP[f"OPEN_PI_{_e}"] = ("open_pi", _e, None)
+for _e in ["CLOUD", "IND", "TOC"]:
+    METRIC_MAP[f"DEF_RATE_{_e}"] = ("deferred_rate", _e, None)
+METRIC_MAP["OPEN_FA_HOLD"] = ("open_fa", "HOLD", None)
+METRIC_MAP["OPEN_FA_CLOUD"] = ("open_fa", "CLOUD", None)
+METRIC_MAP["OPEN_LT_INV"] = ("open_lt_inv", "HOLD", None)
+
+def _mformulas(key):
+    m, ent, rg = METRIC_MAP[key]
+    return [f"={meta_sumifs(m, ent, rg, col=f'{chr(67+i)}$3')}" for i in range(5)]
 
 def _row(ws, L, r, key, label, vals, note=None, numFmt=NUM):
-    line(ws, r, label, values=vals, note=note, numFmt=numFmt)
+    line(ws, r, label, formulas=_mformulas(key), note=note, numFmt=numFmt, font=GREEN_LINK)
     L.reg("Assumptions", key, r, expected=vals)
     return r + 1
 
 def _const(ws, L, r, key, label, val, note=None, numFmt=None):
-    line(ws, r, label, values=[val] * 5, note=note,
-         numFmt=numFmt or ('0.0%' if isinstance(val, float) and val < 1 else '#,##0'))
+    line(ws, r, label, formulas=_mformulas(key), note=note,
+         numFmt=numFmt or ('0.0%' if isinstance(val, float) and val < 1 else '#,##0'),
+         font=GREEN_LINK)
     L.reg("Assumptions", key, r, expected=[val] * 5)
     return r + 1
 
 def gen(wb, L):
     ws = wb.create_sheet("Assumptions")
-    sheet_scaffold(ws, "智擎集团 · 核心假设 Assumptions",
-                   "蓝字=可调输入 | 单位：万元（另注除外）| 改动全模型联动", A.YEARS, "assum")
+    sheet_scaffold(ws, "智擎集团 · 指标视图层 Assumptions",
+                   "全部数值实时取自 Meta 数据表（SUMIFS）| 本页只读，改数请改 Meta!G 列 | 单位：万元", A.YEARS, "assum")
     r = 4
     def sec(t):
         nonlocal r
@@ -114,25 +167,27 @@ def gen_capex(wb, L, eng):
         for col in range(2, 9): ws.cell(row=r, column=col).fill = SECTION_FILL
         r += 1
 
-    sec("── 采购计划（输入）──")
+    sec("── 采购计划（取自 Meta）──")
     ws.column_dimensions["H"].width = 12
-    line(ws, r, "训练 GPU 采购（研究院）", values=A.CAPEX["HOLD_TRAIN"], note="含期初存量并入2023批")
+    _cf = lambda ent: [f"={meta_sumifs('capex_gpu', ent, col=f'{chr(67+i)}$3')}" for i in range(5)]
+    line(ws, r, "训练 GPU 采购（研究院）", formulas=_cf("HOLD"), note="含期初存量并入2023批", font=GREEN_LINK)
     L.reg("Capex_Dep", "CAPEX_TRAIN", r, expected=A.CAPEX["HOLD_TRAIN"]); r += 1
-    line(ws, r, "推理 GPU 采购（智擎云）", values=A.CAPEX["CLOUD_INFER"])
+    line(ws, r, "推理 GPU 采购（智擎云）", formulas=_cf("CLOUD"), font=GREEN_LINK)
     L.reg("Capex_Dep", "CAPEX_INFER", r, expected=A.CAPEX["CLOUD_INFER"]); r += 2
 
-    sec("── 批次折旧明细（H列=批次原值，B列=购置年）──")
+    sec("── 批次折旧明细（H列=批次原值[取自Meta]，B列=购置年）──")
     batch_rows = {}
-    for name, capex_key, opening_key, opening in [
-            ("训练", "CAPEX_TRAIN", "OPEN_FA_HOLD", A.OPENING_FA["HOLD"]),
-            ("推理", "CAPEX_INFER", "OPEN_FA_CLOUD", A.OPENING_FA["CLOUD"])]:
+    for name, ent in [("训练", "HOLD"), ("推理", "CLOUD")]:
         rows = []
         for i, y in enumerate(A.YEARS):
-            orig = opening + A.CAPEX[{"训练": "HOLD_TRAIN", "推理": "CLOUD_INFER"}[name]][0] if i == 0 \
-                else A.CAPEX[{"训练": "HOLD_TRAIN", "推理": "CLOUD_INFER"}[name]][i]
             ws.cell(row=r, column=1, value=f"{name}卡 {y}批").font = BLACK_FORMULA
             b = ws.cell(row=r, column=2, value=y); b.font = BLUE_INPUT; b.number_format = '0"年"'
-            h = ws.cell(row=r, column=8, value=orig); h.font = BLUE_INPUT; h.number_format = NUM
+            h = ws.cell(row=r, column=8)
+            if i == 0:  # 2023 批 = 期初存量 + 当年采购
+                h.value = f"={meta_sumifs('open_fa', ent, col='C$3')}+{meta_sumifs('capex_gpu', ent, col='C$3')}"
+            else:
+                h.value = f"={meta_sumifs('capex_gpu', ent, col=f'{chr(67+i)}$3')}"
+            h.font = GREEN_LINK; h.number_format = NUM
             # 折旧公式：购置当年起 5 年
             for ci in range(5):
                 col = get_column_letter(3 + ci)

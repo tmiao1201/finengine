@@ -98,7 +98,8 @@ def gen_cover(wb, L, eng):
     for col in "BCDEFG": ws.column_dimensions[col].width = 16
 
     nav = [
-        ("Assumptions", "核心假设——全部蓝字输入，改动全模型联动"),
+        ("Meta", "数据层宽表——全模型唯一取数源，日常只改 G 列"),
+        ("Assumptions", "指标视图层——全部实时取自 Meta（SUMIFS）"),
         ("Capex_Dep", "GPU 资本开支与折旧引擎（批次法）"),
         ("Cloud_IS / Cloud_BS_CF", "智擎云 · MaaS（单体全量）"),
         ("Ind_IS / Ind_BS_CF", "智擎行业 · 私有化+解决方案"),

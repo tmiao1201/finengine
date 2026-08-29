@@ -14,6 +14,8 @@ def main(stage="all"):
     eng = engine.build_all()
     wb = Workbook(); wb.remove(wb.active)
     L = Layout()
+    from gen_meta import gen as gen_meta
+    gen_meta(wb, L, eng)      # 数据层先行：所有数字的唯一来源
     gen_assum(wb, L); gen_capex(wb, L, eng)
     if stage in ("holdco", "consol", "all"):
         from gen_subs import gen as gen_subs

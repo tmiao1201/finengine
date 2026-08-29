@@ -2,7 +2,7 @@
 与 Excel 公式互为镜像，重算后逐格对比。单位：万元。"""
 import json, os, sys
 sys.path.insert(0, os.path.dirname(__file__))
-import assumptions as A
+import meta as A   # 数据与逻辑分离：引擎只认 Meta 数据层
 
 D = lambda x: round(float(x), 6)
 
