@@ -57,6 +57,7 @@ flowchart LR
 |---|---|---|
 | **Meta 数据契约** | 所有数字住一张宽表（含 scenario 数据血缘） | 换公司/换数据源引擎零改动；FP&A 日常=设计指标字典+按期灌数 |
 | **行业=指标字典** | 收入逃不出三种模式：量×价/客户×留存/项目×合同 | 行业适配变成填表，不是改代码 |
+| **知识与逻辑分离** | 行业参数不许凭 AI 记忆硬编，走数据源降级链（招股书→tsdata 可比年报→…→诚实标"低置信度假设"） | 参数可审计、冷门行业不空转、宁可标"猜的"不冒充"查的" |
 | **倒挤现金法** | BS 现金 = 负债+权益−非现金资产 | 资产负债表结构性平衡，免循环引用 |
 | **影子引擎双算** | Python 算一遍 + Excel 公式算一遍，逐格对比 | 做错了一定知道（实战抓出 9 个 bug） |
 | **Layout 坐标注册器** | 坐标↔语义key↔期望值 一处真相 | 多 agent 并行写 sheet 不冲突 |
@@ -99,6 +100,16 @@ tests/test_meta_roundtrip.py     ← 数据与逻辑分离的可运行证明
 dist/finengine.xlsx              ← 成品模型（Meta 表在第一张）
 ```
 
+## 第二行业实例：连锁咖啡（skill 通用性实测）
+
+[`examples/coffee/`](examples/coffee/)——用同一套 skill 从零搓的 **volume_price** 模式实例（门店×杯量×客单价），
+12 sheets，与本项目（大模型公司）共享全部行业无关骨架（style/layout/gen_meta/recompute 零改动拷入）。
+
+亮点是 **Step 1b 参数校准管道**：模型先验给的假设经 tsdata 拉 A 股连锁餐饮 4 家可比年报校准——
+原假设 2027 净利率 25%，真实可比中位仅 7.3%/上限 13%，据此修正 3 个参数并落
+Calibration 表（参数|原假设|真实区间|校准值|来源|偏差解释），Meta source 列标注真实出处。
+行业结构差异（现制咖啡 vs 堂食餐饮）允许取区间外，但偏差解释必须写明。
+
 ## 把这套方法用在你的模型上
 
 安装 skill（Claude Code）：
@@ -107,7 +118,9 @@ dist/finengine.xlsx              ← 成品模型（Meta 表在第一张）
 git clone <this-repo> && cp -r <this-repo>/skill/finmodel-builder ~/.claude/skills/
 ```
 
-然后对 Claude 说"**手搓一个 XX 公司的全公式财务模型**"即可触发。方法论与行业无关——换 `assumptions.py` 就是另一家公司。
+然后对 Claude 说"**手搓一个 XX 公司的全公式财务模型**"即可触发。方法论与行业无关——
+换 `industry_config.py`（校准后参数）+ `metric_dict.py`（指标字典）就是另一家公司，
+两个实例（大模型集团 / 连锁咖啡单主体）就是证明。
 
 ## 已知简化（模型诚实度的一部分）
 
